@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from functions.config import system_prompt
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 def parse_args(argv):
     verbose = "--verbose" in argv
@@ -28,14 +28,16 @@ def generate_content(client, messages, verbose):
     )
 
     # Verbose token usage
-    usage = response.usage_metadata
-    if verbose:
-        print(f"Prompt tokens: {usage.prompt_token_count}")
-        print(f"Response tokens: {usage.candidates_token_count}")
-
     if response.function_calls:
         for function_call_part in response.function_calls:
-            print(f"Calling function: {function_call_part.name}({function_call_part.args})")
+            function_call_result = call_function(function_call_part, verbose)
+
+            if not function_call_result.parts or not hasattr(function_call_result.parts[0], 'function_response'):
+                raise Exception("Invalid function call result structure")
+        
+            if verbose:
+                print(f"-> {function_call_result.parts[0].function_response.response['result']}")
+
     else:
         print(response.text)
 
