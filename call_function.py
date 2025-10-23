@@ -26,7 +26,7 @@ def call_function(function_call_part, verbose=False):
         "get_files_info": get_files_info,
         "get_file_content": get_file_content,
         "run_python_file": run_python_file,
-        "write_file": write_file
+        "write_file": write_file,
     }
 
     if function_name not in functions:
