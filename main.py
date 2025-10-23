@@ -41,7 +41,7 @@ def generate_content(client, messages, verbose):
         raise last_err
     
     for cand in response.candidates or []:
-            messages.append(cand.content)
+            messages.append(types.Content(role="assistant", parts=cand.content.parts))
     # Verbose token usage
     if response.function_calls:
         for function_call_part in response.function_calls:
@@ -55,7 +55,7 @@ def generate_content(client, messages, verbose):
         
             messages.append(
                 types.Content(
-                    role="user",
+                    role="tool",
                     parts=function_call_result.parts
                 )
             )
@@ -90,7 +90,7 @@ def main():
             sys.exit(1)
         try:
             resp = generate_content(client, messages, verbose)
-            if resp and resp.text:
+            if (not resp.function_calls) and resp.text:
                 print("Final response:")
                 print(resp.text)
                 break
